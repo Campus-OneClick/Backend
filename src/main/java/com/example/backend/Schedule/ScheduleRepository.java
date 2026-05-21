@@ -26,4 +26,17 @@ List<ScheduleEntity> findConflicts(
         LocalTime startTime,
         LocalTime endTime
     );
+
+    @Query("""
+        SELECT s FROM ScheduleEntity s
+        WHERE s.classroomEntity.classroomId = :classroomId
+        AND s.day = :day
+        AND s.startTime <= :time
+        AND s.endTime > :time
+    """)
+    List<ScheduleEntity> findActiveAt(
+        String classroomId,
+        DayOfWeek day,
+        LocalTime time
+    );
 }

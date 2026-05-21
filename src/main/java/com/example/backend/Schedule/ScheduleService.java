@@ -5,6 +5,7 @@ import com.example.backend.Classroom.ClassroomRepository;
 import org.springframework.stereotype.Service;
 import java.util.*;
 import lombok.RequiredArgsConstructor;
+import java.time.LocalTime;
 
 @Service
 @RequiredArgsConstructor
@@ -140,5 +141,10 @@ public class ScheduleService {
         }
         scheduleRepository.deleteById(id);
         return Map.of("success", true);
+    }
+
+    public boolean isOccupied(String classroomId, DayOfWeek day, LocalTime time) {
+        List<ScheduleEntity> list = scheduleRepository.findActiveAt(classroomId, day, time);
+        return !list.isEmpty();
     }
 }

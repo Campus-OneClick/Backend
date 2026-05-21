@@ -13,6 +13,6 @@ import lombok.Setter;
 public class ClassroomEntity {
 
     @Id
-    private String classroomId; // 공1201, 1201 등
+    private String classroomId; // 1201..
     private String roomName; // 공1201..
 }

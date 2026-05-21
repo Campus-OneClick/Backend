@@ -16,7 +16,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.EnumType;
 import lombok.Getter;
 import lombok.Setter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "schedules")
@@ -31,9 +30,8 @@ public class ScheduleEntity {
     @JoinColumn(name = "classroom_id")
     private ClassroomEntity classroomEntity;
 
-    // Request body에서 classroomId를 직접 받기 위한 임시 필드 (응답에서 제외)
+    // Request body에서 classroomId를 직접 받기 위한 임시 필드
     @Transient
-    @JsonIgnore
     private String classroomId;
 
     @Enumerated(EnumType.STRING)
