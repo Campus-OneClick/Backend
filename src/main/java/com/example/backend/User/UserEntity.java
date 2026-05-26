@@ -13,6 +13,14 @@ public class UserEntity {
 
     private String name;
 
+    private String department;
+
+    @Column(unique = true)
+    private String email;
+
+    @Column(name = "firebase_uid", unique = true)
+    private String firebaseUid;
+
     @Enumerated(EnumType.STRING)
     private UserRole role;
 }

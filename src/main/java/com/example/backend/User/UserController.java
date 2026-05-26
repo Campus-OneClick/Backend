@@ -9,26 +9,33 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserRepository userRepository;
     private final UserService userService;
+    private final FirebaseAuthService firebaseAuthService;
 
     @PostMapping("/login")
-    public Map<String, Object> login(@RequestBody LoginRequest request) {
+    public Map<String, Object> login(@RequestHeader("Authorization") String authorization) {
+        try {
+            FirebaseUserContext firebaseUser = firebaseAuthService.verifyAuthorizationHeader(authorization);
+            UserEntity user = userService.loginWithFirebase(firebaseUser);
 
-        return userRepository.findById(request.getStudentId())
-                .map(user -> Map.of(
-                        "success", true,
-                        "user", user
-                ))
-                .orElse(Map.of(
-                        "success", false
-                ));
+            return Map.of(
+                    "success", true,
+                    "user", user
+            );
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            );
+        }
     }
 
     @PostMapping("/signup")
-    public Map<String, Object> signup(@RequestBody SignupRequest request) {
+    public Map<String, Object> signup(@RequestHeader("Authorization") String authorization,
+                                      @RequestBody SignupRequest request) {
         try {
-            UserEntity user = userService.signup(request);
+            FirebaseUserContext firebaseUser = firebaseAuthService.verifyAuthorizationHeader(authorization);
+            UserEntity user = userService.signupWithFirebase(firebaseUser, request);
             return Map.of(
                     "success", true,
                     "user", user
@@ -53,4 +60,5 @@ public class UserController {
             );
         }
     }
+
 }
