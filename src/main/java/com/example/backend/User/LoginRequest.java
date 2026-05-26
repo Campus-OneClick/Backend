@@ -6,4 +6,6 @@ import lombok.*;
 @Setter
 public class LoginRequest {
     private String studentId;
+    private String email;
+    private String firebaseUid;
 } 
