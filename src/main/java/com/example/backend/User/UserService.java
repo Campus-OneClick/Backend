@@ -70,6 +70,16 @@ public class UserService {
         userRepository.deleteById(studentId);
     }
 
+    public boolean existsByEmail(String email) {
+        String normalizedEmail = normalize(email);
+
+        if (normalizedEmail == null) {
+            throw new IllegalArgumentException("이메일을 입력해주세요.");
+        }
+
+        return userRepository.existsByEmailIgnoreCase(normalizedEmail);
+    }
+
     private String normalize(String value) {
         if (value == null) {
             return null;

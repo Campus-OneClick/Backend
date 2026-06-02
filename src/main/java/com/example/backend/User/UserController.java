@@ -61,4 +61,20 @@ public class UserController {
         }
     }
 
+    @GetMapping("/users/check-email")
+    public Map<String, Object> checkEmail(@RequestParam String email) {
+        try {
+            boolean exists = userService.existsByEmail(email);
+            return Map.of(
+                    "success", true,
+                    "exists", exists
+            );
+        } catch (IllegalArgumentException e) {
+            return Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            );
+        }
+    }
+
 }

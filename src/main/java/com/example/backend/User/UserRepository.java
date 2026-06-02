@@ -9,5 +9,7 @@ public interface UserRepository
 
         Optional<UserEntity> findByEmail(String email);
 
+        boolean existsByEmailIgnoreCase(String email);
+
         Optional<UserEntity> findByFirebaseUid(String firebaseUid);
 }
