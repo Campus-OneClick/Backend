@@ -4,7 +4,7 @@ WORKDIR /workspace
 COPY gradle gradle
 COPY gradlew build.gradle settings.gradle ./
 COPY src src
-RUN ./gradlew bootJar -x test
+RUN chmod +x ./gradlew && ./gradlew bootJar -x test
 
 # Run stage
 FROM eclipse-temurin:21-jre
