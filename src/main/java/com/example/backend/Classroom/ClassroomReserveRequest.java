@@ -5,5 +5,6 @@ public record ClassroomReserveRequest(
         String day,       // MON, TUE, WED, THU, FRI
         String startTime, // "9:00"
         String endTime,   // "10:30"
-        String studentId
+        String studentId,
+        String memo
 ) {}
