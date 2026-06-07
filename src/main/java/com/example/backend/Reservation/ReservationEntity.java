@@ -53,4 +53,6 @@ public class ReservationEntity {
     private String requestedAt;
 
     private String processedAt;
+
+    private String rejectionReason;
 }

@@ -1,16 +1,28 @@
 package com.example.backend.Classroom;
 
-import org.springframework.stereotype.Service;
+import com.example.backend.Reservation.ReservationEntity;
+import com.example.backend.Reservation.ReservationRepository;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
+import org.springframework.stereotype.Service;
 
 @Service
 public class ClassroomService {
 
     private final ClassroomRepository classroomRepository;
+    private final ReservationRepository reservationRepository;
 
-    public ClassroomService(ClassroomRepository classroomRepository) {
+    public ClassroomService(ClassroomRepository classroomRepository, ReservationRepository reservationRepository) {
         this.classroomRepository = classroomRepository;
+        this.reservationRepository = reservationRepository;
     }
+
+    private static final Map<String, String> DAY_KO = Map.of(
+            "MON", "월", "TUE", "화", "WED", "수", "THU", "목", "FRI", "금"
+    );
 
     public ClassroomEntity create(ClassroomEntity classroomEntity) {
         if (classroomEntity.getClassroomId() == null) {
@@ -22,8 +34,42 @@ public class ClassroomService {
         if (classroomRepository.existsById(classroomEntity.getClassroomId())) {
             throw new IllegalArgumentException("이미 존재하는 classroomId 입니다.");
         }
-
         return classroomRepository.save(classroomEntity);
+    }
+
+    public void delete(String id) {
+        if (!classroomRepository.existsById(id)) {
+            throw new IllegalArgumentException("존재하지 않는 강의실입니다.");
+        }
+        classroomRepository.deleteById(id);
+    }
+
+    public ReservationEntity reserve(ClassroomReserveRequest req) {
+        if (req.studentId() == null || req.studentId().isBlank()) {
+            throw new IllegalArgumentException("studentId는 필수입니다.");
+        }
+        if (req.roomId() == null || req.roomId().isBlank()) {
+            throw new IllegalArgumentException("roomId는 필수입니다.");
+        }
+
+        int nextNum = reservationRepository.findMaxNumByType("lecture")
+                .map(n -> n + 1)
+                .orElse(1);
+
+        String dayKo = DAY_KO.getOrDefault(req.day(), req.day());
+        String timeRange = req.startTime() + " ~ " + req.endTime();
+        String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM/dd HH:mm"));
+        String dateStr = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+
+        ReservationEntity entity = new ReservationEntity(
+                null, "lecture", nextNum, req.studentId(),
+                req.roomId(), null, dateStr, dayKo, timeRange, 0, now, null, null
+        );
+        return reservationRepository.save(entity);
+    }
+
+    public List<ReservationEntity> getReservationsByRoom(String roomId) {
+        return reservationRepository.findByTypeAndLecture("lecture", roomId);
     }
 
     public List<ClassroomEntity> findAll() {

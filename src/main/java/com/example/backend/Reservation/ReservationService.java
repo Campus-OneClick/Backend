@@ -19,9 +19,9 @@ public class ReservationService {
             return;
         }
 
-        reservationRepository.save(new ReservationEntity(null, "lecture", 1, "5711111", "공1201", null, "2026/05/10", "월", "13:00 ~ 14:00", 0, "05/19 14:22", null));
-        reservationRepository.save(new ReservationEntity(null, "lecture", 2, "5633333", "공1202", null, "2026/05/11", "수", "14:00 ~ 15:30", 0, "05/19 15:10", null));
-        reservationRepository.save(new ReservationEntity(null, "lounge", 1, "5755555", null, "10", "2026/05/10", "월", "13:00 ~ 14:00", 0, "05/19 13:00", null));
+        reservationRepository.save(new ReservationEntity(null, "lecture", 1, "5711111", "공1201", null, "2026/05/10", "월", "13:00 ~ 14:00", 0, "05/19 14:22", null, null));
+        reservationRepository.save(new ReservationEntity(null, "lecture", 2, "5633333", "공1202", null, "2026/05/11", "수", "14:00 ~ 15:30", 0, "05/19 15:10", null, null));
+        reservationRepository.save(new ReservationEntity(null, "lounge", 1, "5755555", null, "10", "2026/05/10", "월", "13:00 ~ 14:00", 0, "05/19 13:00", null, null));
     }
 
     public List<ReservationEntity> findAll() {
@@ -36,11 +36,18 @@ public class ReservationService {
         return reservationRepository.save(reservationEntity);
     }
 
-    public ReservationEntity updateStatus(String type, Integer num, Integer status) {
+    public ReservationEntity updateStatus(String type, Integer num, Integer status, String rejectionReason) {
         ReservationEntity reservation = findByTypeAndNum(type, num);
         reservation.setStatus(status);
         reservation.setProcessedAt(currentTimeString());
+        if (status == 2 && rejectionReason != null && !rejectionReason.isBlank()) {
+            reservation.setRejectionReason(rejectionReason);
+        }
         return reservationRepository.save(reservation);
+    }
+
+    public List<ReservationEntity> findRejectedByUser(String studentId) {
+        return reservationRepository.findByUserAndStatus(studentId, 2);
     }
 
     public void delete(String type, Integer num) {
