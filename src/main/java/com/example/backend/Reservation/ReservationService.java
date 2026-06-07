@@ -19,9 +19,9 @@ public class ReservationService {
             return;
         }
 
-        reservationRepository.save(new ReservationEntity(null, "lecture", 1, "5711111", "공1201", null, "2026/05/10", "월", "13:00 ~ 14:00", 0, "05/19 14:22", null, null));
-        reservationRepository.save(new ReservationEntity(null, "lecture", 2, "5633333", "공1202", null, "2026/05/11", "수", "14:00 ~ 15:30", 0, "05/19 15:10", null, null));
-        reservationRepository.save(new ReservationEntity(null, "lounge", 1, "5755555", null, "10", "2026/05/10", "월", "13:00 ~ 14:00", 0, "05/19 13:00", null, null));
+        reservationRepository.save(new ReservationEntity(null, "lecture", 1, "5711111", "공1201", null, "2026/05/10", "월", "13:00 ~ 14:00", 0, "05/19 14:22", null, null, null));
+        reservationRepository.save(new ReservationEntity(null, "lecture", 2, "5633333", "공1202", null, "2026/05/11", "수", "14:00 ~ 15:30", 0, "05/19 15:10", null, null, null));
+        reservationRepository.save(new ReservationEntity(null, "lounge", 1, "5755555", null, "10", "2026/05/10", "월", "13:00 ~ 14:00", 0, "05/19 13:00", null, null, null));
     }
 
     public List<ReservationEntity> findAll() {

@@ -63,7 +63,7 @@ public class ClassroomService {
 
         ReservationEntity entity = new ReservationEntity(
                 null, "lecture", nextNum, req.studentId(),
-                req.roomId(), null, dateStr, dayKo, timeRange, 0, now, null, null
+                req.roomId(), null, dateStr, dayKo, timeRange, 0, now, null, null, req.memo()
         );
         return reservationRepository.save(entity);
     }
