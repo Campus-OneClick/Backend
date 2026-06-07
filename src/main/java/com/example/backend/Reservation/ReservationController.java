@@ -36,11 +36,17 @@ public class ReservationController {
             @RequestBody Map<String, Object> body
     ) {
         Integer status = ((Number) body.get("status")).intValue();
-        return reservationService.updateStatus(type, num, status);
+        String rejectionReason = (String) body.get("rejectionReason");
+        return reservationService.updateStatus(type, num, status, rejectionReason);
     }
 
     @DeleteMapping("/{type}/{num}")
     public void delete(@PathVariable String type, @PathVariable Integer num) {
         reservationService.delete(type, num);
+    }
+
+    @GetMapping("/rejected/{studentId}")
+    public List<ReservationEntity> getRejected(@PathVariable String studentId) {
+        return reservationService.findRejectedByUser(studentId);
     }
 }
