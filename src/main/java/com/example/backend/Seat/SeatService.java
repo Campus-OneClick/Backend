@@ -3,6 +3,7 @@ package com.example.backend.Seat;
 import jakarta.annotation.PostConstruct;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,11 +17,16 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class SeatService {
 
+    private static final ZoneId KST = ZoneId.of("Asia/Seoul");
+
     private final SeatRepository seatRepository;
 
     @PostConstruct
+    @Transactional
     public void initializeSeats() {
         if (seatRepository.count() > 0) {
+            // 서버 재시작 시 만료 좌석 즉시 해제 (Render 슬립 후 wake-up 대응)
+            releaseExpiredSeats();
             return;
         }
 
@@ -63,7 +69,7 @@ public class SeatService {
             throw new IllegalArgumentException("이미 예약된 좌석입니다.");
         }
 
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(KST);
         seat.setStatus(SeatStatus.USING);
         seat.setStudentId(request.studentId());
         seat.setStartTime(now);
@@ -104,7 +110,7 @@ public class SeatService {
         validateStudentId(request.studentId());
         ensureOwnedByCurrentUser(seat, request.studentId());
 
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(KST);
         if (seat.getEndTime() != null && Duration.between(now, seat.getEndTime()).toMinutes() > 60) {
             throw new IllegalArgumentException("퇴실 1시간 전부터 연장이 가능합니다.");
         }
@@ -123,7 +129,7 @@ public class SeatService {
     @Scheduled(fixedRate = 60000)
     @Transactional
     public void releaseExpiredSeats() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(KST);
         List<SeatEntity> expiredSeats = seatRepository.findByStatusNotAndEndTimeLessThanEqual(SeatStatus.EMPTY, now);
 
         if (expiredSeats.isEmpty()) {
