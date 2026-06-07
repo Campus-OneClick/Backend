@@ -2,8 +2,8 @@ package com.example.backend.Classroom;
 
 import com.example.backend.Reservation.ReservationEntity;
 import com.example.backend.Reservation.ReservationRepository;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
@@ -58,8 +58,9 @@ public class ClassroomService {
 
         String dayKo = DAY_KO.getOrDefault(req.day(), req.day());
         String timeRange = req.startTime() + " ~ " + req.endTime();
-        String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM/dd HH:mm"));
-        String dateStr = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+        ZonedDateTime kstNow = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
+        String now = kstNow.format(DateTimeFormatter.ofPattern("MM/dd HH:mm"));
+        String dateStr = kstNow.format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
 
         ReservationEntity entity = new ReservationEntity(
                 null, "lecture", nextNum, req.studentId(),

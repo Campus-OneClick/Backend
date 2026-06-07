@@ -1,7 +1,8 @@
 package com.example.backend.Reservation;
 
 import jakarta.annotation.PostConstruct;
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Service;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+
+    private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 
     @PostConstruct
     public void seedReservations() {
@@ -39,9 +42,14 @@ public class ReservationService {
     public ReservationEntity updateStatus(String type, Integer num, Integer status, String rejectionReason) {
         ReservationEntity reservation = findByTypeAndNum(type, num);
         reservation.setStatus(status);
-        reservation.setProcessedAt(currentTimeString());
-        if (status == 2 && rejectionReason != null && !rejectionReason.isBlank()) {
-            reservation.setRejectionReason(rejectionReason);
+        if (status == 0) {
+            reservation.setProcessedAt(null);
+            reservation.setRejectionReason(null);
+        } else {
+            reservation.setProcessedAt(currentTimeString());
+            if (status == 2 && rejectionReason != null && !rejectionReason.isBlank()) {
+                reservation.setRejectionReason(rejectionReason);
+            }
         }
         return reservationRepository.save(reservation);
     }
@@ -79,7 +87,6 @@ public class ReservationService {
     }
 
     private String currentTimeString() {
-        LocalDateTime now = LocalDateTime.now();
-        return now.format(DateTimeFormatter.ofPattern("MM/dd HH:mm"));
+        return ZonedDateTime.now(KST).format(DateTimeFormatter.ofPattern("MM/dd HH:mm"));
     }
 }
