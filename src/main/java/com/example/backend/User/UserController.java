@@ -77,4 +77,37 @@ public class UserController {
         }
     }
 
+    @GetMapping("/users/check-student-id")
+    public Map<String, Object> checkStudentId(@RequestParam String studentId) {
+        try {
+            boolean exists = userService.existsByStudentId(studentId);
+            return Map.of(
+                    "success", true,
+                    "exists", exists
+            );
+        } catch (IllegalArgumentException e) {
+            return Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            );
+        }
+    }
+
+    @GetMapping("/users/find-email")
+    public Map<String, Object> findEmail(@RequestParam String studentId,
+                                         @RequestParam String name) {
+        try {
+            String email = userService.findEmailByStudentIdAndName(studentId, name);
+            return Map.of(
+                    "success", true,
+                    "email", email
+            );
+        } catch (IllegalArgumentException e) {
+            return Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            );
+        }
+    }
+
 }
