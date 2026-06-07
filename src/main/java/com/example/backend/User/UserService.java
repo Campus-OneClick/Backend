@@ -43,6 +43,12 @@ public class UserService {
             }
         });
 
+        userRepository.findById(studentId).ifPresent(existing -> {
+            if (!email.equals(existing.getEmail()) || !firebaseUid.equals(existing.getFirebaseUid())) {
+                throw new IllegalArgumentException("이미 등록된 학번입니다.");
+            }
+        });
+
         UserEntity existingUser = userRepository.findByFirebaseUid(firebaseUid)
                 .or(() -> userRepository.findByEmail(email))
                 .orElseGet(() -> userRepository.findById(studentId).orElse(null));
@@ -68,6 +74,39 @@ public class UserService {
         }
 
         userRepository.deleteById(studentId);
+    }
+
+    public boolean existsByEmail(String email) {
+        String normalizedEmail = normalize(email);
+
+        if (normalizedEmail == null) {
+            throw new IllegalArgumentException("이메일을 입력해주세요.");
+        }
+
+        return userRepository.existsByEmailIgnoreCase(normalizedEmail);
+    }
+
+    public boolean existsByStudentId(String studentId) {
+        String normalizedStudentId = normalize(studentId);
+
+        if (normalizedStudentId == null) {
+            throw new IllegalArgumentException("학번을 입력해주세요.");
+        }
+
+        return userRepository.existsById(normalizedStudentId);
+    }
+
+    public String findEmailByStudentIdAndName(String studentId, String name) {
+        String normalizedStudentId = normalize(studentId);
+        String normalizedName = normalize(name);
+
+        if (normalizedStudentId == null || normalizedName == null) {
+            throw new IllegalArgumentException("학번과 이름을 모두 입력해주세요.");
+        }
+
+        return userRepository.findByStudentIdAndName(normalizedStudentId, normalizedName)
+                .map(UserEntity::getEmail)
+                .orElseThrow(() -> new IllegalArgumentException("일치하는 사용자를 찾을 수 없습니다."));
     }
 
     private String normalize(String value) {

@@ -8,7 +8,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +34,10 @@ public class SeatService {
         seatRepository.saveAll(seats);
     }
 
+    @Transactional
     public Map<String, Object> getSummary(String studentId) {
+        releaseExpiredSeats();
+
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("centerSeats", seatNumbersByLounge("center"));
         response.put("sideSeats", seatNumbersByLounge("side"));
@@ -41,7 +46,10 @@ public class SeatService {
         return response;
     }
 
+    @Transactional
     public Map<String, Object> reserveSeat(SeatRequest request) {
+        releaseExpiredSeats();
+
         SeatEntity seat = findTargetSeat(request);
         validateStudentId(request.studentId());
 
@@ -70,15 +78,15 @@ public class SeatService {
         );
     }
 
+    @Transactional
     public Map<String, Object> returnSeat(SeatRequest request) {
+        releaseExpiredSeats();
+
         SeatEntity seat = findTargetSeat(request);
         validateStudentId(request.studentId());
         ensureOwnedByCurrentUser(seat, request.studentId());
 
-        seat.setStatus(SeatStatus.EMPTY);
-        seat.setStudentId(null);
-        seat.setStartTime(null);
-        seat.setEndTime(null);
+        clearSeat(seat);
         seatRepository.save(seat);
 
         return Map.of(
@@ -88,7 +96,10 @@ public class SeatService {
         );
     }
 
+    @Transactional
     public Map<String, Object> extendSeat(SeatRequest request) {
+        releaseExpiredSeats();
+
         SeatEntity seat = findTargetSeat(request);
         validateStudentId(request.studentId());
         ensureOwnedByCurrentUser(seat, request.studentId());
@@ -107,6 +118,20 @@ public class SeatService {
                 "seat", seatToMap(seat),
                 "summary", getSummary(request.studentId())
         );
+    }
+
+    @Scheduled(fixedRate = 60000)
+    @Transactional
+    public void releaseExpiredSeats() {
+        LocalDateTime now = LocalDateTime.now();
+        List<SeatEntity> expiredSeats = seatRepository.findByStatusNotAndEndTimeLessThanEqual(SeatStatus.EMPTY, now);
+
+        if (expiredSeats.isEmpty()) {
+            return;
+        }
+
+        expiredSeats.forEach(this::clearSeat);
+        seatRepository.saveAll(expiredSeats);
     }
 
     private SeatEntity findTargetSeat(SeatRequest request) {
@@ -129,6 +154,13 @@ public class SeatService {
         if (seat.getStatus() == SeatStatus.EMPTY || seat.getStudentId() == null || !seat.getStudentId().equals(studentId)) {
             throw new IllegalArgumentException("해당 좌석을 이용 중인 사용자가 아닙니다.");
         }
+    }
+
+    private void clearSeat(SeatEntity seat) {
+        seat.setStatus(SeatStatus.EMPTY);
+        seat.setStudentId(null);
+        seat.setStartTime(null);
+        seat.setEndTime(null);
     }
 
     private List<Integer> seatNumbersByLounge(String lounge) {
