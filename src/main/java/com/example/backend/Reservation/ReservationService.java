@@ -45,21 +45,6 @@ public class ReservationService {
     @Transactional
     public ReservationEntity updateStatus(String type, Integer num, Integer status, String rejectionReason) {
         ReservationEntity reservation = findByTypeAndNum(type, num);
-        if (status == 2) {
-            // 거절: RejectionLog에 저장하고 예약 레코드 삭제
-            rejectionLogRepository.save(new RejectionLog(
-                    null,
-                    reservation.getUser(),
-                    reservation.getClassroomId(),
-                    reservation.getDay(),
-                    reservation.getTime(),
-                    rejectionReason,
-                    currentTimeString()
-            ));
-            reservationRepository.delete(reservation);
-            return null;
-        }
-
         reservation.setStatus(status);
         if (status == 0) {
             reservation.setProcessedAt(null);
@@ -67,6 +52,19 @@ public class ReservationService {
         } else {
             reservation.setProcessedAt(currentTimeString());
             reservation.setProcessedTimestamp(LocalDateTime.now(KST));
+            if (status == 2) {
+                // 거절: 사용자 알림용으로 RejectionLog에도 저장
+                // reservations 레코드는 관리자 처리완료 탭에서 볼 수 있도록 유지 (7일 후 스케줄러가 삭제)
+                rejectionLogRepository.save(new RejectionLog(
+                        null,
+                        reservation.getUser(),
+                        reservation.getClassroomId(),
+                        reservation.getDay(),
+                        reservation.getTime(),
+                        rejectionReason,
+                        currentTimeString()
+                ));
+            }
         }
         return reservationRepository.save(reservation);
     }
