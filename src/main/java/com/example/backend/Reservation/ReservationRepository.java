@@ -14,9 +14,7 @@ public interface ReservationRepository extends JpaRepository<ReservationEntity, 
 
     boolean existsByTypeAndNum(String type, Integer num);
 
-    List<ReservationEntity> findByTypeAndLecture(String type, String lecture);
-
-    List<ReservationEntity> findByUserAndStatus(String user, Integer status);
+    List<ReservationEntity> findByTypeAndClassroomId(String type, String classroomId);
 
     List<ReservationEntity> findByStatusNotAndProcessedTimestampBefore(Integer status, LocalDateTime cutoff);
 
