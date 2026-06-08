@@ -1,12 +1,15 @@
 package com.example.backend.Reservation;
 
 import jakarta.annotation.PostConstruct;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,9 +25,9 @@ public class ReservationService {
             return;
         }
 
-        reservationRepository.save(new ReservationEntity(null, "lecture", 1, "5711111", "공1201", null, "2026/05/10", "월", "13:00 ~ 14:00", 0, "05/19 14:22", null, null, null));
-        reservationRepository.save(new ReservationEntity(null, "lecture", 2, "5633333", "공1202", null, "2026/05/11", "수", "14:00 ~ 15:30", 0, "05/19 15:10", null, null, null));
-        reservationRepository.save(new ReservationEntity(null, "lounge", 1, "5755555", null, "10", "2026/05/10", "월", "13:00 ~ 14:00", 0, "05/19 13:00", null, null, null));
+        reservationRepository.save(new ReservationEntity(null, "lecture", 1, "5711111", "공1201", null, "2026/05/10", "월", "13:00 ~ 14:00", 0, "05/19 14:22", null, null, null, null));
+        reservationRepository.save(new ReservationEntity(null, "lecture", 2, "5633333", "공1202", null, "2026/05/11", "수", "14:00 ~ 15:30", 0, "05/19 15:10", null, null, null, null));
+        reservationRepository.save(new ReservationEntity(null, "lounge", 1, "5755555", null, "10", "2026/05/10", "월", "13:00 ~ 14:00", 0, "05/19 13:00", null, null, null, null));
     }
 
     public List<ReservationEntity> findAll() {
@@ -44,9 +47,11 @@ public class ReservationService {
         reservation.setStatus(status);
         if (status == 0) {
             reservation.setProcessedAt(null);
+            reservation.setProcessedTimestamp(null);
             reservation.setRejectionReason(null);
         } else {
             reservation.setProcessedAt(currentTimeString());
+            reservation.setProcessedTimestamp(LocalDateTime.now(KST));
             if (status == 2 && rejectionReason != null && !rejectionReason.isBlank()) {
                 reservation.setRejectionReason(rejectionReason);
             }
@@ -56,6 +61,15 @@ public class ReservationService {
 
     public List<ReservationEntity> findRejectedByUser(String studentId) {
         return reservationRepository.findByUserAndStatus(studentId, 2);
+    }
+
+    @Scheduled(fixedRate = 3_600_000)
+    @Transactional
+    public void deleteOldProcessedReservations() {
+        LocalDateTime cutoff = LocalDateTime.now(KST).minusDays(7);
+        List<ReservationEntity> old = reservationRepository
+                .findByStatusNotAndProcessedTimestampBefore(0, cutoff);
+        reservationRepository.deleteAll(old);
     }
 
     public void delete(String type, Integer num) {

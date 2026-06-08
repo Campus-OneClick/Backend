@@ -1,5 +1,6 @@
 package com.example.backend.Reservation;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,6 +17,8 @@ public interface ReservationRepository extends JpaRepository<ReservationEntity, 
     List<ReservationEntity> findByTypeAndLecture(String type, String lecture);
 
     List<ReservationEntity> findByUserAndStatus(String user, Integer status);
+
+    List<ReservationEntity> findByStatusNotAndProcessedTimestampBefore(Integer status, LocalDateTime cutoff);
 
     @Query("SELECT MAX(r.num) FROM ReservationEntity r WHERE r.type = :type")
     Optional<Integer> findMaxNumByType(@Param("type") String type);

@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -53,6 +54,8 @@ public class ReservationEntity {
     private String requestedAt;
 
     private String processedAt;
+
+    private LocalDateTime processedTimestamp;
 
     private String rejectionReason;
 

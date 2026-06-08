@@ -1,5 +1,6 @@
 package com.example.backend.Seat;
 
+import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,5 +35,17 @@ public class SeatController {
     @PostMapping("/extend")
     public Map<String, Object> extendSeat(@RequestBody SeatRequest request) {
         return seatService.extendSeat(request);
+    }
+
+    @GetMapping("/admin/active")
+    public List<Map<String, Object>> getActiveSeats() {
+        return seatService.getActiveSeats();
+    }
+
+    @PostMapping("/admin/force-release")
+    public Map<String, Object> forceReleaseSeat(@RequestBody Map<String, Object> body) {
+        String lounge = (String) body.get("lounge");
+        Integer seatId = (Integer) body.get("seatId");
+        return seatService.forceReleaseSeat(lounge, seatId);
     }
 }

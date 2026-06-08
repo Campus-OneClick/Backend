@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import com.example.backend.User.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class SeatService {
     private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 
     private final SeatRepository seatRepository;
+    private final UserRepository userRepository;
 
     @PostConstruct
     @Transactional
@@ -138,6 +140,31 @@ public class SeatService {
 
         expiredSeats.forEach(this::clearSeat);
         seatRepository.saveAll(expiredSeats);
+    }
+
+    @Transactional
+    public List<Map<String, Object>> getActiveSeats() {
+        return seatRepository.findByStatus(SeatStatus.USING).stream().map(seat -> {
+            Map<String, Object> map = new LinkedHashMap<>(seatToMap(seat));
+            userRepository.findById(seat.getStudentId()).ifPresent(u -> map.put("name", u.getName()));
+            if (seat.getEndTime() != null) {
+                long remaining = Duration.between(LocalDateTime.now(KST), seat.getEndTime()).toMinutes();
+                map.put("remainingMinutes", Math.max(remaining, 0));
+            }
+            return map;
+        }).toList();
+    }
+
+    @Transactional
+    public Map<String, Object> forceReleaseSeat(String lounge, Integer seatId) {
+        SeatEntity seat = seatRepository.findByLoungeAndSeatNumber(lounge.trim().toLowerCase(), seatId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 좌석입니다."));
+        if (seat.getStatus() == SeatStatus.EMPTY) {
+            throw new IllegalArgumentException("이미 비어있는 좌석입니다.");
+        }
+        clearSeat(seat);
+        seatRepository.save(seat);
+        return Map.of("success", true, "message", "좌석이 강제 해제되었습니다.");
     }
 
     private SeatEntity findTargetSeat(SeatRequest request) {
