@@ -3,6 +3,7 @@ package com.example.backend.Schedule;
 import java.time.LocalTime;
 
 import com.example.backend.Classroom.ClassroomEntity;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -37,7 +38,10 @@ public class ScheduleEntity {
     @Enumerated(EnumType.STRING)
     private DayOfWeek day;
 
+    @JsonFormat(pattern = "HH:mm")
     private LocalTime startTime;
+
+    @JsonFormat(pattern = "HH:mm")
     private LocalTime endTime;
 
     private String subject;
