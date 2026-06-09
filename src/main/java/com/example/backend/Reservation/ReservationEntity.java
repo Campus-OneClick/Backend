@@ -56,5 +56,8 @@ public class ReservationEntity {
 
     private LocalDateTime processedTimestamp;
 
+    @Column(name = "rejection_reason")
+    private String rejectionReason;
+
     private String memo;
 }

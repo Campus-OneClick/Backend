@@ -26,8 +26,8 @@ public class ReservationService {
             return;
         }
 
-        reservationRepository.save(new ReservationEntity(null, "lecture", 1, "5711111", "공1201", "2026/05/10", "월", "13:00 ~ 14:00", 0, "05/19 14:22", null, null, null));
-        reservationRepository.save(new ReservationEntity(null, "lecture", 2, "5633333", "공1202", "2026/05/11", "수", "14:00 ~ 15:30", 0, "05/19 15:10", null, null, null));
+        reservationRepository.save(new ReservationEntity(null, "lecture", 1, "5711111", "공1201", "2026/05/10", "월", "13:00 ~ 14:00", 0, "05/19 14:22", null, null, null, null));
+        reservationRepository.save(new ReservationEntity(null, "lecture", 2, "5633333", "공1202", "2026/05/11", "수", "14:00 ~ 15:30", 0, "05/19 15:10", null, null, null, null));
     }
 
     public List<ReservationEntity> findAll() {
@@ -53,8 +53,7 @@ public class ReservationService {
             reservation.setProcessedAt(currentTimeString());
             reservation.setProcessedTimestamp(LocalDateTime.now(KST));
             if (status == 2) {
-                // 거절: 사용자 알림용으로 RejectionLog에도 저장
-                // reservations 레코드는 관리자 처리완료 탭에서 볼 수 있도록 유지 (7일 후 스케줄러가 삭제)
+                reservation.setRejectionReason(rejectionReason);
                 rejectionLogRepository.save(new RejectionLog(
                         null,
                         reservation.getUser(),
