@@ -53,7 +53,7 @@ public class RoomUsageService {
     }
 
     private boolean hasActiveReservation(String roomName, String dayKo, LocalTime now) {
-        return reservationRepository.findByTypeAndLecture("lecture", roomName).stream()
+        return reservationRepository.findByTypeAndClassroomId("lecture", roomName).stream()
                 .filter(r -> r.getStatus() == 1)
                 .filter(r -> dayKo.equals(r.getDay()))
                 .anyMatch(r -> isTimeInRange(r.getTime(), now));
