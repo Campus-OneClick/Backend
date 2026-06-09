@@ -66,13 +66,16 @@ public class ClassroomService {
 
         ReservationEntity entity = new ReservationEntity(
                 null, "lecture", nextNum, req.studentId(),
-                req.roomId(), null, dateStr, dayKo, timeRange, 0, now, null, null, req.memo()
+                req.roomId(), dateStr, dayKo, timeRange, 0, now, null, null, req.memo()
         );
         return reservationRepository.save(entity);
     }
 
     public List<ReservationEntity> getReservationsByRoom(String roomId) {
-        return reservationRepository.findByTypeAndLecture("lecture", roomId);
+        return reservationRepository.findByTypeAndClassroomId("lecture", roomId)
+                .stream()
+                .filter(r -> r.getStatus() != 2)
+                .toList();
     }
 
     public List<ClassroomEntity> findAll() {

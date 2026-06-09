@@ -46,7 +46,7 @@ public class ReservationController {
     }
 
     @GetMapping("/rejected/{studentId}")
-    public List<ReservationEntity> getRejected(@PathVariable String studentId) {
+    public List<RejectionLog> getRejected(@PathVariable String studentId) {
         return reservationService.findRejectedByUser(studentId);
     }
 }

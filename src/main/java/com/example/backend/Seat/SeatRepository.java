@@ -14,5 +14,7 @@ public interface SeatRepository extends JpaRepository<SeatEntity, Long> {
 
     List<SeatEntity> findByStatusNotAndEndTimeLessThanEqual(SeatStatus status, LocalDateTime endTime);
 
+    List<SeatEntity> findByStatus(SeatStatus status);
+
     long countByStatus(SeatStatus status);
 }
