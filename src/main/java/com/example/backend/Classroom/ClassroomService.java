@@ -60,7 +60,9 @@ public class ClassroomService {
         String timeRange = req.startTime() + " ~ " + req.endTime();
         ZonedDateTime kstNow = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
         String now = kstNow.format(DateTimeFormatter.ofPattern("MM/dd HH:mm"));
-        String dateStr = kstNow.format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+        String dateStr = (req.date() != null && !req.date().isBlank())
+                ? req.date()
+                : kstNow.format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
 
         ReservationEntity entity = new ReservationEntity(
                 null, "lecture", nextNum, req.studentId(),
