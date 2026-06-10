@@ -110,4 +110,9 @@ public class UserController {
         }
     }
 
+    @GetMapping("/health")
+    public Map<String, Object> health() {
+        return Map.of("status", "ok");
+    }
+
 }
